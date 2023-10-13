@@ -18,47 +18,56 @@ export class User {
 
   @Column({
     comment: '用户名',
+    default: 'NULL',
     length: 50
   })
   username: string
 
   @Column({
     comment: '密码',
+    default: 'NULL',
     length: 50
   })
   password: string
 
   @Column({
     comment: '头像',
+    default: 'NULL',
     length: 100
   })
   head_pic: string
 
   @Column({
     comment: '邮箱',
+    default: 'NULL',
     length: 50
   })
   email: string
 
   @Column({
     comment: '昵称',
+    default: 'NULL',
     length: 50
   })
   nick_name: string
 
   @Column({
     comment: '手机号',
+    default: 'null',
+    // unique: true,
     length: 20
   })
   phone: string
 
   @Column({
-    comment: '是否冻结'
+    comment: '是否冻结',
+    default: false
   })
   is_frozen: boolean
 
   @Column({
-    comment: '是否是管理员'
+    comment: '是否是管理员',
+    default: false
   })
   is_admin: boolean
 
@@ -77,4 +86,5 @@ export class User {
     name: 'user_role'
   })
   roles: Role[]
+  phoneNumber: string
 }
