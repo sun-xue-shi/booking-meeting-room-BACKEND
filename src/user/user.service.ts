@@ -11,6 +11,9 @@ import { Role } from './entities/role.entity'
 import { Permission } from './entities/permission.entity'
 import { LoginUserDto } from './dto/login-user.dto'
 import { LoginUserVo } from './vo/login-user.vo'
+import { UserInfoVo } from './vo/user-info.vo'
+import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
+import { UpdateUserDto } from './vo/udpate-user.dto'
 
 @Injectable()
 export class UserService {
@@ -174,6 +177,96 @@ export class UserService {
         })
         return arr
       }, [])
+    }
+  }
+
+  // 修改密码前先得到已有信息
+  async findUserInfoById(userId: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: userId
+      }
+    })
+
+    const vo = new UserInfoVo()
+    vo.id = user.id
+    vo.email = user.email
+    vo.username = user.username
+    vo.headPic = user.head_pic
+    vo.phoneNumber = user.phoneNumber
+    vo.nickName = user.nick_name
+    vo.createTime = user.create_time
+    vo.isFrozen = user.is_frozen
+
+    return vo
+  }
+
+  // 修改密码
+  async updatePassword(userId: number, passwordDto: UpdateUserPasswordDto) {
+    // 查验证码
+    const captch = await this.redisService.get(
+      `update_password_captcha_${passwordDto.email}`
+    )
+
+    if (!captch) {
+      throw new HttpException('验证码失效', HttpStatus.BAD_REQUEST)
+    }
+
+    if (captch !== passwordDto.captcha) {
+      throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST)
+    }
+
+    // 根据id查用户
+    const foundUser = await this.userRepository.findOneBy({
+      id: userId
+    })
+
+    // 修改并保存新密码
+    foundUser.password = md5(passwordDto.password)
+
+    try {
+      await this.userRepository.save(foundUser)
+      return '密码修改成功'
+    } catch (e) {
+      this.logger.error(e, UserService)
+      return '密码修改失败'
+    }
+  }
+
+  // 修改密码
+  async update(userId: number, updateUser: UpdateUserDto) {
+    // 查验证码
+    const captch = await this.redisService.get(
+      `update_user_captcha_${updateUser.email}`
+    )
+
+    if (!captch) {
+      throw new HttpException('验证码失效', HttpStatus.BAD_REQUEST)
+    }
+
+    if (captch !== updateUser.captcha) {
+      throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST)
+    }
+
+    // 根据id查用户
+    const foundUser = await this.userRepository.findOneBy({
+      id: userId
+    })
+
+    if (updateUser.headPic) {
+      foundUser.head_pic = updateUser.headPic
+    }
+
+    if (updateUser.nickName) {
+      foundUser.nick_name = updateUser.nickName
+    }
+
+    try {
+      await this.userRepository.save(foundUser)
+      return '用户信息修改成功'
+    } catch (e) {
+      this.logger.error(e, UserService)
+      return '用户信息修改失败'
     }
   }
 }

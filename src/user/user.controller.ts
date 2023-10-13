@@ -14,6 +14,9 @@ import { EmailService } from 'src/email/email.service'
 import { LoginUserDto } from './dto/login-user.dto'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
+import { RequireLogin, UserInfo } from 'src/custom.decorator'
+import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
+import { UpdateUserDto } from './vo/udpate-user.dto'
 
 @Controller('user')
 export class UserController {
@@ -125,7 +128,7 @@ export class UserController {
     return vo
   }
 
-  // 刷新普通用户refresh_token
+  // 刷新普通用户refresh_token接口
   @Get('refresh')
   async refresh(@Query('refresh_token') refreshToken: string) {
     try {
@@ -165,7 +168,7 @@ export class UserController {
     }
   }
 
-  // 刷新管理员refresh_token
+  // 刷新管理员refresh_token接口
   @Get('admin/refresh')
   async adminRefresh(@Query('refresh_token') refreshToken: string) {
     try {
@@ -203,5 +206,68 @@ export class UserController {
     } catch (e) {
       throw new UnauthorizedException('token失效,请重新登录')
     }
+  }
+
+  // 回显用户信息接口
+  @Get('info')
+  @RequireLogin()
+  async info(@UserInfo('userId') userId: number) {
+    return await this.userService.findUserInfoById(userId)
+  }
+
+  // 修改密码接口
+  @Post(['update_password', 'admin/update_password'])
+  @RequireLogin()
+  async updatePassword(
+    @UserInfo('userId') userId: number,
+    @Body() passwordDto: UpdateUserPasswordDto
+  ) {
+    return await this.userService.updatePassword(userId, passwordDto)
+  }
+
+  // 发送修改密码的验证码-接口
+  @Get('update_password/captcha')
+  async updatePasswordCaptch(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8)
+
+    await this.redisService.set(
+      `update_password_captcha_${address}`,
+      code,
+      10 * 60
+    )
+
+    await this.emailService.sendMail({
+      to: address,
+      subject: '更改密码',
+      html: `<p>你的验证码是${code}</p>`
+    })
+
+    return '发生成功'
+  }
+
+  // 修改个人信息接口
+  @Post(['update', 'admin/update'])
+  @RequireLogin()
+  async update(
+    @UserInfo('userId') userId: number,
+    @Body() updateUser: UpdateUserDto
+  ) {
+    return await this.userService.update(userId, updateUser)
+  }
+
+  // 发送修改个人信息的验证码-接口
+  @Get('update/captcha')
+  async updateCaptch(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8)
+
+    await this.redisService.set(`update_user_captcha_${address}`, code, 10 * 60)
+
+    await this.emailService.sendMail({
+      to: address,
+      subject: '修改个人信息',
+      html: `<p>你的验证码是${code}</p>`
+    })
+
+    return '发生成功'
   }
 }

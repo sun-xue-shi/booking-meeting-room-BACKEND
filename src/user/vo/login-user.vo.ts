@@ -1,4 +1,4 @@
-// 封装返回信息
+// 封装登录用户的返回信息
 interface UserInfo {
   id: number
 
