@@ -14,6 +14,7 @@ import { LoginUserVo } from './vo/login-user.vo'
 import { UserInfoVo } from './vo/user-info.vo'
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
 import { UpdateUserDto } from './vo/udpate-user.dto'
+import { UserListVo } from './vo/user-list.vo'
 
 @Injectable()
 export class UserService {
@@ -293,6 +294,7 @@ export class UserService {
 
     const condition: Record<string, any> = {}
 
+    // 模糊查询
     if (username) {
       condition.username = Like(`%${username}%`)
     }
@@ -305,7 +307,7 @@ export class UserService {
       condition.email = Like(`%${email}%`)
     }
 
-    const [user, totalCount] = await this.userRepository.findAndCount({
+    const [users, totalCount] = await this.userRepository.findAndCount({
       select: [
         'id',
         'email',
@@ -321,9 +323,10 @@ export class UserService {
       where: condition
     })
 
-    return {
-      user,
-      totalCount
-    }
+    const vo = new UserListVo()
+    vo.totalCount = totalCount
+    vo.users = users
+
+    return vo
   }
 }
