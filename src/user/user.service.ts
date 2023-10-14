@@ -3,7 +3,7 @@ import { RegisterUserDto } from './dto/register-user.dto'
 import { Inject } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
-import { Repository } from 'typeorm'
+import { Like, Repository } from 'typeorm'
 import { Logger } from '@nestjs/common'
 import { RedisService } from 'src/redis/redis.service'
 import { md5 } from 'src/utils'
@@ -267,6 +267,63 @@ export class UserService {
     } catch (e) {
       this.logger.error(e, UserService)
       return '用户信息修改失败'
+    }
+  }
+
+  // 冻结用户
+  async freezeUserById(userId: number) {
+    const user = await this.userRepository.findOneBy({
+      id: userId
+    })
+
+    user.is_frozen = true
+
+    await this.userRepository.save(user)
+  }
+
+  // 查找用户列表
+  async findUsers(
+    username: string,
+    nickName: string,
+    email: string,
+    pageNo: number,
+    pageSize: number
+  ) {
+    const skipCount = (pageNo - 1) * pageSize
+
+    const condition: Record<string, any> = {}
+
+    if (username) {
+      condition.username = Like(`%${username}%`)
+    }
+
+    if (nickName) {
+      condition.nick_name = Like(`%${nickName}%`)
+    }
+
+    if (email) {
+      condition.email = Like(`%${email}%`)
+    }
+
+    const [user, totalCount] = await this.userRepository.findAndCount({
+      select: [
+        'id',
+        'email',
+        'head_pic',
+        'create_time',
+        'nick_name',
+        'username',
+        'phone',
+        'is_frozen'
+      ],
+      skip: skipCount,
+      take: pageSize,
+      where: condition
+    })
+
+    return {
+      user,
+      totalCount
     }
   }
 }

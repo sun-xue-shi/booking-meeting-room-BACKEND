@@ -10,7 +10,7 @@ import { Response } from 'express'
 export class CustomExceptionFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost) {
     const response: Response = host.switchToHttp().getResponse()
-    // response.statusCode = exception.getStatus()
+    response.statusCode = exception.getStatus()
 
     const res = exception.getResponse() as { message: string[] }
     response
