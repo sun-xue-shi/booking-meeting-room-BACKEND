@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   DefaultValuePipe,
@@ -7,7 +8,9 @@ import {
   Inject,
   Post,
   Query,
-  UnauthorizedException
+  UnauthorizedException,
+  UploadedFile,
+  UseInterceptors
 } from '@nestjs/common'
 import { UserService } from './user.service'
 import { RegisterUserDto } from './dto/register-user.dto'
@@ -30,6 +33,9 @@ import {
 import { LoginUserVo } from './vo/login-user.vo'
 import { RefreshTokenVo } from './vo/refresh-token.vo'
 import { UserInfoVo } from './vo/user-info.vo'
+import { FileInterceptor } from '@nestjs/platform-express'
+import * as path from 'path'
+import { storage } from 'src/file-storage'
 
 @ApiTags('用户管理模块')
 @Controller('user')
@@ -310,14 +316,14 @@ export class UserController {
   }
 
   // 回显用户信息接口
-  // @ApiBearerAuth()
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'success',
     type: UserInfoVo
   })
   @Get('info')
-  // @RequireLogin()
+  @RequireLogin()
   async info(@UserInfo('userId') userId: number) {
     console.log(22)
     return await this.userService.findUserInfoById(userId)
@@ -487,5 +493,26 @@ export class UserController {
       pageNo,
       pageSize
     )
+  }
+
+  // 上传文件
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      dest: 'uploads',
+      storage: storage,
+      limits: { fieldSize: 1024 * 1024 * 3 },
+      fileFilter(req, file, callback) {
+        const extname = path.extname(file.originalname)
+        if (['.png', '.gif', '.jpg'].includes(extname)) {
+          callback(null, true)
+        } else {
+          callback(new BadRequestException('只能上传图片'), false)
+        }
+      }
+    })
+  )
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    return file.path
   }
 }
