@@ -13,7 +13,7 @@ import { LoginUserDto } from './dto/login-user.dto'
 import { LoginUserVo } from './vo/login-user.vo'
 import { UserInfoVo } from './vo/user-info.vo'
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
-import { UpdateUserDto } from './vo/udpate-user.dto'
+import { UpdateUserDto } from './dto/udpate-user.dto'
 import { UserListVo } from './vo/user-list.vo'
 
 @Injectable()
@@ -37,10 +37,12 @@ export class UserService {
     const captcha = await this.redisService.get(`captcha_${user.email}`)
 
     if (!captcha) {
+      console.log('验证码失效')
       throw new HttpException('验证码失效', HttpStatus.BAD_REQUEST)
     }
 
     if (user.captcha !== captcha) {
+      console.log('验证码错误')
       throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST)
     }
 
@@ -169,6 +171,7 @@ export class UserService {
     return {
       id: user.id,
       username: user.username,
+      email: user.email,
       roles: user.roles.map((item) => item.rolename),
       permissions: user.roles.reduce((arr, item) => {
         item.permissions.forEach((permission) => {
@@ -199,11 +202,22 @@ export class UserService {
     vo.createTime = user.create_time
     vo.isFrozen = user.is_frozen
 
+    console.log(vo)
+
     return vo
   }
 
   // 修改密码
-  async updatePassword(userId: number, passwordDto: UpdateUserPasswordDto) {
+  async updatePassword(passwordDto: UpdateUserPasswordDto) {
+    // 根据id查用户
+    const foundUser = await this.userRepository.findOneBy({
+      username: passwordDto.username
+    })
+
+    if (foundUser.email !== passwordDto.email) {
+      throw new HttpException('该邮箱未关联该用户', HttpStatus.BAD_REQUEST)
+    }
+
     // 查验证码
     const captch = await this.redisService.get(
       `update_password_captcha_${passwordDto.email}`
@@ -217,11 +231,6 @@ export class UserService {
       throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST)
     }
 
-    // 根据id查用户
-    const foundUser = await this.userRepository.findOneBy({
-      id: userId
-    })
-
     // 修改并保存新密码
     foundUser.password = md5(passwordDto.password)
 
@@ -234,7 +243,7 @@ export class UserService {
     }
   }
 
-  // 修改密码
+  // 修改用户信息
   async update(userId: number, updateUser: UpdateUserDto) {
     // 查验证码
     const captch = await this.redisService.get(

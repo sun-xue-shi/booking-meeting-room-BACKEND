@@ -11,11 +11,12 @@ import { Reflector } from '@nestjs/core'
 import { JwtService } from '@nestjs/jwt'
 import { Role } from './user/entities/role.entity'
 import { Permission } from './user/entities/permission.entity'
-import { UnloginException } from './unlogin.filter'
+// import { UnloginException } from './unlogin.filter'
 
 interface JwtUserData {
   userId: number
   username: string
+  email: string
   roles: Role[]
   permissions: Permission[]
 }
@@ -53,8 +54,11 @@ export class LoginGuard implements CanActivate {
     // 验证登录
     const authorization = request.headers.authorization
 
+    console.log(authorization)
+
     if (!authorization) {
-      throw new UnloginException()
+      // throw new UnloginException('用户未登录')
+      throw new UnauthorizedException('用户未登录')
     }
 
     try {
@@ -65,6 +69,7 @@ export class LoginGuard implements CanActivate {
       request.user = {
         userId: data.userId,
         username: data.username,
+        email: data.email,
         roles: data.roles,
         permissions: data.permissions
       }

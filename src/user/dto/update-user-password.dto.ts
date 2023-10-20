@@ -28,4 +28,10 @@ export class UpdateUserPasswordDto {
     message: '验证码不能为空'
   })
   captcha: string
+
+  @ApiProperty()
+  @IsNotEmpty({
+    message: '用户名不能为空'
+  })
+  username: string
 }

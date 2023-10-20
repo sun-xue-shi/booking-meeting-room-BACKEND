@@ -18,7 +18,7 @@ import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { RequireLogin, UserInfo } from 'src/custom.decorator'
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
-import { UpdateUserDto } from './vo/udpate-user.dto'
+import { UpdateUserDto } from './dto/udpate-user.dto'
 import { generateParseIntPipe } from 'src/utils'
 import {
   ApiBearerAuth,
@@ -125,6 +125,7 @@ export class UserController {
         userId: vo.userInfo.id,
         username: vo.userInfo.username,
         roles: vo.userInfo.roles,
+        email: vo.userInfo.email,
         permissions: vo.userInfo.permissions
       },
       {
@@ -169,6 +170,7 @@ export class UserController {
       {
         userId: vo.userInfo.id,
         username: vo.userInfo.username,
+        email: vo.userInfo.email,
         roles: vo.userInfo.roles,
         permissions: vo.userInfo.permissions
       },
@@ -209,7 +211,7 @@ export class UserController {
     type: RefreshTokenVo
   })
   @Get('refresh')
-  async refresh(@Query('refresh_token') refreshToken: string) {
+  async refresh(@Query('refreshToken') refreshToken: string) {
     try {
       const data = this.jwtService.verify(refreshToken)
 
@@ -219,6 +221,7 @@ export class UserController {
         {
           userId: user.id,
           username: user.username,
+          email: user.email,
           roles: user.roles,
           permissions: user.permissions
         },
@@ -276,6 +279,7 @@ export class UserController {
         {
           userId: user.id,
           username: user.username,
+          email: user.email,
           roles: user.roles,
           permissions: user.permissions
         },
@@ -306,20 +310,20 @@ export class UserController {
   }
 
   // 回显用户信息接口
-  @ApiBearerAuth()
+  // @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'success',
     type: UserInfoVo
   })
   @Get('info')
-  @RequireLogin()
+  // @RequireLogin()
   async info(@UserInfo('userId') userId: number) {
+    console.log(22)
     return await this.userService.findUserInfoById(userId)
   }
 
   // 修改密码接口
-  @ApiBearerAuth()
   @ApiBody({
     type: UpdateUserPasswordDto
   })
@@ -328,12 +332,8 @@ export class UserController {
     description: '验证码已失效/不正确'
   })
   @Post(['update_password', 'admin/update_password'])
-  @RequireLogin()
-  async updatePassword(
-    @UserInfo('userId') userId: number,
-    @Body() passwordDto: UpdateUserPasswordDto
-  ) {
-    return await this.userService.updatePassword(userId, passwordDto)
+  async updatePassword(@Body() passwordDto: UpdateUserPasswordDto) {
+    return await this.userService.updatePassword(passwordDto)
   }
 
   // 发送修改密码的验证码-接口
@@ -346,8 +346,6 @@ export class UserController {
     type: String,
     description: '发送成功'
   })
-  @ApiBearerAuth()
-  @RequireLogin()
   @Get('update_password/captcha')
   async updatePasswordCaptch(@Query('address') address: string) {
     const code = Math.random().toString().slice(2, 8)
@@ -364,7 +362,7 @@ export class UserController {
       html: `<p>你的验证码是${code}</p>`
     })
 
-    return '发生成功'
+    return '发送成功'
   }
 
   // 修改个人信息接口
@@ -391,19 +389,19 @@ export class UserController {
   }
 
   // 发送修改个人信息的验证码-接口
-  @ApiQuery({
-    name: 'address',
-    description: '邮箱地址',
-    type: String
-  })
+  // @ApiQuery({
+  //   name: 'address',
+  //   description: '邮箱地址',
+  //   type: String
+  // })
   @ApiResponse({
     type: String,
     description: '发送成功'
   })
+  @Get('update/captcha')
   @ApiBearerAuth()
   @RequireLogin()
-  @Get('update/captcha')
-  async updateCaptch(@Query('address') address: string) {
+  async updateCaptch(@UserInfo('email') address: string) {
     const code = Math.random().toString().slice(2, 8)
 
     await this.redisService.set(`update_user_captcha_${address}`, code, 10 * 60)
@@ -414,7 +412,7 @@ export class UserController {
       html: `<p>你的验证码是${code}</p>`
     })
 
-    return '发生成功'
+    return '发送成功'
   }
 
   // 冻结用户接口

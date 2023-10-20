@@ -19,6 +19,7 @@ export class User {
   @Column({
     comment: '用户名',
     default: 'NULL',
+    unique: true,
     length: 50
   })
   username: string
