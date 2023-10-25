@@ -75,7 +75,7 @@ export class UserService {
   async initData() {
     const user1 = new User()
     user1.username = 'zhangsan'
-    user1.password = md5('111111')
+    user1.password = md5('333333')
     user1.email = 'xxx@xx.com'
     user1.is_admin = true
     user1.nick_name = '张三'

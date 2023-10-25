@@ -136,7 +136,7 @@ export class UserController {
       },
       {
         expiresIn:
-          this.configService.get('jwt_access_token_expires_time') || '30m'
+          this.configService.get('jwt_access_token_expires_time') || '1m'
       }
     )
 
@@ -275,7 +275,7 @@ export class UserController {
     type: RefreshTokenVo
   })
   @Get('admin/refresh')
-  async adminRefresh(@Query('refresh_token') refreshToken: string) {
+  async adminRefresh(@Query('refreshToken') refreshToken: string) {
     try {
       const data = this.jwtService.verify(refreshToken)
 
