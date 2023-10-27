@@ -38,6 +38,7 @@ export class MeetingRoomService {
     pageSize: number,
     name: string,
     equipment: string,
+    location: string,
     capacity: number
   ) {
     if (pageNo < 1) {
@@ -53,6 +54,9 @@ export class MeetingRoomService {
     }
     if (equipment) {
       condition.equipment = Like(`%${equipment}%`)
+    }
+    if (location) {
+      condition.location = Like(`%${location}%`)
     }
     if (capacity) {
       condition.capacity = capacity
