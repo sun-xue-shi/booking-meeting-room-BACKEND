@@ -322,6 +322,7 @@ export class UserService {
         'email',
         'head_pic',
         'create_time',
+        'update_time',
         'nick_name',
         'username',
         'phone',

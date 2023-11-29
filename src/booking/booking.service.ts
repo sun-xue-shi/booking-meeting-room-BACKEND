@@ -76,6 +76,9 @@ export class BookingService {
     bookingStartTime: number,
     bookingEndTime: number
   ) {
+    console.log(bookingStartTime)
+    console.log(bookingEndTime)
+
     if (pageNo < 1) {
       throw new BadRequestException('页码不能小于1')
     }

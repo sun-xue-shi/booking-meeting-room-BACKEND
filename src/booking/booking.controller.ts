@@ -1,7 +1,6 @@
 import { Controller, DefaultValuePipe, Get, Param, Query } from '@nestjs/common'
 import { BookingService } from './booking.service'
-import { CreateBookingDto } from './dto/create-booking.dto'
-import { UpdateBookingDto } from './dto/update-booking.dto'
+
 import { generateParseIntPipe } from 'src/utils'
 
 @Controller('booking')
@@ -21,8 +20,8 @@ export class BookingController {
     @Query('username') username: string,
     @Query('roomName') roomName: string,
     @Query('location') location: string,
-    @Query('bookingStartTime') bookingStartTime: number,
-    @Query('bookingEndTime') bookingEndTime: number
+    @Query('bookingTimeRangeStart') bookingTimeRangeStart: number,
+    @Query('bookingTimeRangeEnd') bookingTimeRangeEnd: number
   ) {
     return await this.bookingService.find(
       pageNo,
@@ -30,8 +29,8 @@ export class BookingController {
       username,
       roomName,
       location,
-      bookingStartTime,
-      bookingEndTime
+      bookingTimeRangeStart,
+      bookingTimeRangeEnd
     )
   }
 

@@ -52,10 +52,10 @@ export class MeetingRoom {
   @CreateDateColumn({
     comment: '创建时间'
   })
-  createTime: Date
+  createTime: string
 
   @UpdateDateColumn({
     comment: '更新时间'
   })
-  updateTime: Date
+  updateTime: string
 }
