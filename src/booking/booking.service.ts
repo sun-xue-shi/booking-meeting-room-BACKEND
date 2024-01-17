@@ -1,11 +1,18 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common'
 import { Booking } from './entities/booking.entity'
-import { Between, EntityManager, Like } from 'typeorm'
+import {
+  Between,
+  EntityManager,
+  LessThanOrEqual,
+  Like,
+  MoreThanOrEqual
+} from 'typeorm'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { MeetingRoom } from 'src/meeting-room/entities/meeting-room.entity'
 import { User } from 'src/user/entities/user.entity'
 import { RedisService } from 'src/redis/redis.service'
 import { EmailService } from 'src/email/email.service'
+import { CreateBookingDto } from './dto/create-booking.dto'
 
 @Injectable()
 export class BookingService {
@@ -71,52 +78,53 @@ export class BookingService {
     pageNo: number,
     pageSize: number,
     username: string,
-    roomName: string,
-    location: string,
-    bookingStartTime: number,
-    bookingEndTime: number
+    meetingRoomName: string,
+    meetingRoomPosition: string,
+    bookingTimeRangeStart: number,
+    bookingTimeRangeEnd: number
   ) {
-    console.log(bookingStartTime)
-    console.log(bookingEndTime)
-
-    if (pageNo < 1) {
-      throw new BadRequestException('页码不能小于1')
-    }
-
     const skipCount = (pageNo - 1) * pageSize
-
-    const condition: Record<string, any> = { user: {}, room: {} }
+    const condition: Record<string, any> = {}
 
     if (username) {
-      condition.user.username = Like(`%${username}%`)
-    }
-    if (roomName) {
-      condition.room.name = Like(`%${roomName}%`)
-    }
-    if (location) {
-      condition.room.location = Like(`%${location}%`)
-    }
-    if (bookingStartTime) {
-      if (!bookingEndTime) {
-        bookingEndTime = bookingStartTime + 60 * 60 * 1000
-      } else {
-        condition.startTime = Between(
-          new Date(bookingStartTime),
-          new Date(bookingEndTime)
-        )
+      condition.user = {
+        username: Like(`%${username}%`)
       }
+    }
+
+    if (meetingRoomName) {
+      condition.room = {
+        name: Like(`%${meetingRoomName}%`)
+      }
+    }
+
+    if (meetingRoomPosition) {
+      if (!condition.room) {
+        condition.room = {}
+      }
+      condition.room.location = Like(`%${meetingRoomPosition}%`)
+    }
+
+    if (bookingTimeRangeStart) {
+      if (!bookingTimeRangeEnd) {
+        bookingTimeRangeEnd = bookingTimeRangeStart + 60 * 60 * 1000
+      }
+      condition.startTime = Between(
+        new Date(bookingTimeRangeStart),
+        new Date(bookingTimeRangeEnd)
+      )
     }
 
     const [bookings, totalCount] = await this.entityManager.findAndCount(
       Booking,
       {
+        where: condition,
         relations: {
           user: true,
           room: true
         },
         skip: skipCount,
-        take: pageSize,
-        where: condition
+        take: pageSize
       }
     )
 
@@ -206,5 +214,43 @@ export class BookingService {
     })
 
     this.redisService.set('urge_' + id, 1, 60 * 30)
+  }
+
+  // 添加预定
+  async add(bookingToDo: CreateBookingDto, userId: number) {
+    const meetingRoom = await this.entityManager.findOneBy(MeetingRoom, {
+      id: bookingToDo.meetingRoomId
+    })
+
+    if (!meetingRoom) {
+      throw new BadRequestException('会议室不存在')
+    }
+
+    const user = await this.entityManager.findOneBy(User, {
+      id: userId
+    })
+
+    const booking = new Booking()
+    booking.room = meetingRoom
+    booking.note = bookingToDo.note
+    booking.startTime = new Date(bookingToDo.startTime)
+    booking.endTime = new Date(bookingToDo.endTime)
+    booking.user = user
+
+    const res = await this.entityManager.findOneBy(Booking, {
+      room: meetingRoom,
+      endTime: MoreThanOrEqual(booking.endTime),
+      startTime: LessThanOrEqual(booking.startTime)
+    })
+
+    if (res) {
+      throw new BadRequestException('该时间段已被预定')
+    }
+
+    console.log('-------')
+
+    console.log(booking.note)
+
+    await this.entityManager.save(Booking, booking)
   }
 }

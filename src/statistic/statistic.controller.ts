@@ -26,12 +26,12 @@ export class StatisticController {
     status: HttpStatus.OK,
     type: UserBookignCount
   })
-  @Get('userBookingCount')
+  @Get('bookingCount')
   async userBookingCount(
     @Query('startTime') startTime: string,
     @Query('endTime') endTime: string
   ) {
-    return this.statisticService.userBookingCount(startTime, endTime)
+    return this.statisticService.bookingCount(startTime, endTime)
   }
 
   // 会议室预定次数
@@ -50,7 +50,7 @@ export class StatisticController {
     status: HttpStatus.OK,
     type: MeetingRoomUsedCount
   })
-  @Get('meetingRoomUsedCount')
+  @Get('roomUsedCount')
   async meetingRoomUsedCount(
     @Query('startTime') startTime: string,
     @Query('endTime') endTime: string
@@ -58,6 +58,3 @@ export class StatisticController {
     return this.statisticService.roomUsedCount(startTime, endTime)
   }
 }
-
-
-

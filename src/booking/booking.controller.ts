@@ -1,7 +1,17 @@
-import { Controller, DefaultValuePipe, Get, Param, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Get,
+  Param,
+  Post,
+  Query
+} from '@nestjs/common'
 import { BookingService } from './booking.service'
 
 import { generateParseIntPipe } from 'src/utils'
+import { CreateBookingDto } from './dto/create-booking.dto'
+import { UserInfo } from 'src/custom.decorator'
 
 @Controller('booking')
 export class BookingController {
@@ -56,5 +66,21 @@ export class BookingController {
   @Get('urge/:id')
   async urge(@Param('id') id: number) {
     return await this.bookingService.urge(id)
+  }
+
+  // 添加预定
+  @Post('add')
+  async add(
+    @Body() booking: CreateBookingDto,
+    @UserInfo('userId') userId: number
+  ) {
+    console.log(booking)
+
+    console.log('---')
+
+    console.log(booking.meetingRoomId)
+
+    await this.bookingService.add(booking, userId)
+    return 'success'
   }
 }
