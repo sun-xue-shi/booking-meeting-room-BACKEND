@@ -13,4 +13,6 @@ export class CreateBookingDto {
   endTime: number
 
   note: string
+
+  theme: string
 }

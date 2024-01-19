@@ -44,4 +44,21 @@ export class StatisticService {
       .getRawMany()
     return res
   }
+
+  async bookingThemeCount(startTime: string, endTime: string) {
+    const res = await this.entityManager
+      .createQueryBuilder(Booking, 'b')
+      .select('b.theme', 'bookingTheme')
+      .addSelect('count(1)', 'themeCount')
+      .where('b.startTime between :time1 and :time2', {
+        time1: startTime,
+        time2: endTime
+      })
+      .addGroupBy('b.theme')
+      .getRawMany()
+
+    console.log(res)
+
+    return res
+  }
 }

@@ -79,6 +79,7 @@ export class BookingService {
     pageSize: number,
     username: string,
     meetingRoomName: string,
+    theme: string,
     meetingRoomPosition: string,
     bookingTimeRangeStart: number,
     bookingTimeRangeEnd: number
@@ -91,7 +92,11 @@ export class BookingService {
         username: Like(`%${username}%`)
       }
     }
-
+    if (theme) {
+      condition.theme = {
+        theme: Like(`%${theme}%`)
+      }
+    }
     if (meetingRoomName) {
       condition.room = {
         name: Like(`%${meetingRoomName}%`)
@@ -127,6 +132,8 @@ export class BookingService {
         take: pageSize
       }
     )
+
+    console.log(bookings)
 
     return {
       bookings: bookings.map((item) => {
@@ -232,6 +239,7 @@ export class BookingService {
 
     const booking = new Booking()
     booking.room = meetingRoom
+    booking.theme = bookingToDo.theme
     booking.note = bookingToDo.note
     booking.startTime = new Date(bookingToDo.startTime)
     booking.endTime = new Date(bookingToDo.endTime)

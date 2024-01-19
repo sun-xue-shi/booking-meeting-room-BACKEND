@@ -30,6 +30,7 @@ export class BookingController {
     @Query('username') username: string,
     @Query('roomName') roomName: string,
     @Query('location') location: string,
+    @Query('theme') theme: string,
     @Query('bookingTimeRangeStart') bookingTimeRangeStart: number,
     @Query('bookingTimeRangeEnd') bookingTimeRangeEnd: number
   ) {
@@ -38,6 +39,7 @@ export class BookingController {
       pageSize,
       username,
       roomName,
+      theme,
       location,
       bookingTimeRangeStart,
       bookingTimeRangeEnd
@@ -74,12 +76,6 @@ export class BookingController {
     @Body() booking: CreateBookingDto,
     @UserInfo('userId') userId: number
   ) {
-    console.log(booking)
-
-    console.log('---')
-
-    console.log(booking.meetingRoomId)
-
     await this.bookingService.add(booking, userId)
     return 'success'
   }

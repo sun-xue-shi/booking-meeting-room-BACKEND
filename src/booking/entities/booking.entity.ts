@@ -36,6 +36,12 @@ export class Booking {
   })
   note: string
 
+  @Column({
+    comment: '会议室主题',
+    default: '无'
+  })
+  theme: string
+
   @ManyToOne(() => MeetingRoom)
   room: MeetingRoom
 
