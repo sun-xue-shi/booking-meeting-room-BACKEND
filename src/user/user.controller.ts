@@ -16,7 +16,7 @@ import { UserService } from './user.service'
 import { RegisterUserDto } from './dto/register-user.dto'
 import { RedisService } from 'src/redis/redis.service'
 import { EmailService } from 'src/email/email.service'
-import { LoginUserDto } from './dto/login-user.dto'
+import { PassLoginDto } from './dto/pass-login.dto'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { RequireLogin, UserInfo } from 'src/custom.decorator'
@@ -36,6 +36,7 @@ import { UserInfoVo } from './vo/user-info.vo'
 import { FileInterceptor } from '@nestjs/platform-express'
 import * as path from 'path'
 import { storage } from 'src/file-storage'
+import { EmailLoginDto } from './dto/email-login.dto'
 
 @ApiTags('用户管理模块')
 @Controller('user')
@@ -100,6 +101,35 @@ export class UserController {
     return '发送成功'
   }
 
+  // 发送登录验证码接口
+  @ApiQuery({
+    name: 'address',
+    type: String,
+    description: '邮箱地址',
+    required: true,
+    example: 'xxx@xx.com'
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '发送成功',
+    type: String
+  })
+  @Get('login-captcha')
+  async loginCaptcha(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8)
+
+    // 把验证码存到redis
+    await this.redisService.set(`login_captcha_${address}`, code, 5 * 60)
+
+    // 发送验证码
+    await this.emailService.sendMail({
+      to: address,
+      subject: '登录验证码',
+      html: `<p>你的验证码是${code}</p>`
+    })
+    return '发送成功'
+  }
+
   // 初始化数据
   @Get('init-data')
   async initData() {
@@ -107,9 +137,9 @@ export class UserController {
     return 'done'
   }
 
-  // 普通用户登录接口
+  // 普通用户邮箱登录接口
   @ApiBody({
-    type: LoginUserDto
+    type: EmailLoginDto
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -121,10 +151,56 @@ export class UserController {
     description: '用户信息和 token',
     type: LoginUserVo
   })
-  @Post('login')
-  async userLogin(@Body() loginUser: LoginUserDto) {
+  @Post('emaillogin')
+  async emailLogin(@Body() loginUser: EmailLoginDto) {
     // 获取普通用户登录信息vo来生成token
-    const vo = await this.userService.login(loginUser, false)
+    const vo = await this.userService.emailLogin(loginUser)
+
+    vo.accessToken = this.jwtService.sign(
+      {
+        userId: vo.userInfo.id,
+        username: vo.userInfo.username,
+        roles: vo.userInfo.roles,
+        email: vo.userInfo.email,
+        permissions: vo.userInfo.permissions
+      },
+      {
+        expiresIn:
+          this.configService.get('jwt_access_token_expires_time') || '1m'
+      }
+    )
+
+    vo.refreshToken = this.jwtService.sign(
+      {
+        userId: vo.userInfo.id
+      },
+      {
+        expiresIn:
+          this.configService.get('jwt_refresh_token_expres_time') || '7d'
+      }
+    )
+
+    return vo
+  }
+
+  // 普通用户密码登录接口
+  @ApiBody({
+    type: PassLoginDto
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '用户不存在/密码错误',
+    type: String
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '用户信息和 token',
+    type: LoginUserVo
+  })
+  @Post('passlogin')
+  async passLogin(@Body() loginUser: PassLoginDto) {
+    // 获取普通用户登录信息vo来生成token
+    const vo = await this.userService.passLogin(loginUser, false)
 
     vo.accessToken = this.jwtService.sign(
       {
@@ -155,7 +231,7 @@ export class UserController {
 
   // 管理员登录接口
   @ApiBody({
-    type: LoginUserDto
+    type: PassLoginDto
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -168,9 +244,9 @@ export class UserController {
     type: LoginUserVo
   })
   @Post('admin/login')
-  async adminLogin(@Body() loginUser: LoginUserDto) {
+  async adminLogin(@Body() loginUser: PassLoginDto) {
     // 获取管理员登录信息vo来生成token
-    const vo = await this.userService.login(loginUser, true)
+    const vo = await this.userService.passLogin(loginUser, true)
 
     vo.accessToken = this.jwtService.sign(
       {

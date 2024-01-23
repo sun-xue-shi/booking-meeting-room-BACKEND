@@ -9,12 +9,13 @@ import { RedisService } from 'src/redis/redis.service'
 import { md5 } from 'src/utils'
 import { Role } from './entities/role.entity'
 import { Permission } from './entities/permission.entity'
-import { LoginUserDto } from './dto/login-user.dto'
+import { PassLoginDto } from './dto/pass-login.dto'
 import { LoginUserVo } from './vo/login-user.vo'
 import { UserInfoVo } from './vo/user-info.vo'
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
 import { UpdateUserDto } from './dto/udpate-user.dto'
 import { UserListVo } from './vo/user-list.vo'
+import { EmailLoginDto } from './dto/email-login.dto'
 
 @Injectable()
 export class UserService {
@@ -37,12 +38,10 @@ export class UserService {
     const captcha = await this.redisService.get(`captcha_${user.email}`)
 
     if (!captcha) {
-      console.log('验证码失效')
       throw new HttpException('验证码失效', HttpStatus.BAD_REQUEST)
     }
 
     if (user.captcha !== captcha) {
-      console.log('验证码错误')
       throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST)
     }
 
@@ -112,8 +111,8 @@ export class UserService {
     await this.userRepository.save([user1, user2])
   }
 
-  // 登录
-  async login(loginUser: LoginUserDto, isAdmin: boolean) {
+  // 密码登录
+  async passLogin(loginUser: PassLoginDto, isAdmin: boolean) {
     // 根据条件-数据库查询用户
     const user = await this.userRepository.findOne({
       where: {
@@ -157,6 +156,60 @@ export class UserService {
     return vo
   }
 
+  // 邮箱登录
+  async emailLogin(loginUser: EmailLoginDto) {
+    const captcha = await this.redisService.get(
+      `login_captcha_${loginUser.email}`
+    )
+
+    if (!captcha) {
+      throw new HttpException('验证码失效', HttpStatus.BAD_REQUEST)
+    }
+
+    if (loginUser.captcha !== captcha) {
+      throw new HttpException('验证码错误', HttpStatus.BAD_REQUEST)
+    }
+    // 根据条件-数据库查询用户
+    const user = await this.userRepository.findOne({
+      where: {
+        username: loginUser.username
+      },
+      relations: ['roles', 'roles.permissions']
+    })
+
+    if (!user) {
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST)
+    }
+
+    if (user.email !== loginUser.email) {
+      throw new HttpException('邮箱错误', HttpStatus.BAD_REQUEST)
+    }
+
+    // 封装返回的用户信息
+    const vo = new LoginUserVo()
+    vo.userInfo = {
+      id: user.id,
+      username: user.username,
+      nickName: user.nick_name,
+      headPic: user.head_pic,
+      email: user.email,
+      isAdmin: user.is_admin,
+      isFrozen: user.is_frozen,
+      phoneNumber: user.phoneNumber,
+      createTime: user.create_time,
+      roles: user.roles.map((item) => item.rolename),
+      permissions: user.roles.reduce((arr, item) => {
+        item.permissions.forEach((permission) => {
+          // 去重
+          if (arr.indexOf(permission) === -1) {
+            arr.push(permission)
+          }
+        })
+        return arr
+      }, [])
+    }
+    return vo
+  }
   // 根据id查用户
   async findUserById(userId: number, isAdmin: boolean) {
     // 根据条件-数据库查询用户
