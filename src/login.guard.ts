@@ -54,8 +54,6 @@ export class LoginGuard implements CanActivate {
     // 验证登录
     const authorization = request.headers.authorization
 
-    console.log(authorization)
-
     if (!authorization) {
       // throw new UnloginException('用户未登录')
       throw new UnauthorizedException('用户未登录')

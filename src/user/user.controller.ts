@@ -166,7 +166,7 @@ export class UserController {
       },
       {
         expiresIn:
-          this.configService.get('jwt_access_token_expires_time') || '1m'
+          this.configService.get('jwt_access_token_expires_time') || '30m'
       }
     )
 
@@ -401,7 +401,6 @@ export class UserController {
   @Get('info')
   @RequireLogin()
   async info(@UserInfo('userId') userId: number) {
-    console.log(22)
     return await this.userService.findUserInfoById(userId)
   }
 

@@ -10,6 +10,7 @@ export class StatisticService {
   @InjectEntityManager()
   private entityManager: EntityManager
 
+  // 用户预定次数
   async bookingCount(startTime: string, endTime: string) {
     console.log(startTime)
 
@@ -29,6 +30,7 @@ export class StatisticService {
     return res
   }
 
+  // 房间预定次数
   async roomUsedCount(startTime: string, endTime: string) {
     const res = await this.entityManager
       .createQueryBuilder(Booking, 'b')
@@ -56,8 +58,6 @@ export class StatisticService {
       })
       .addGroupBy('b.theme')
       .getRawMany()
-
-    console.log(res)
 
     return res
   }
