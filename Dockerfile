@@ -26,4 +26,4 @@ RUN npm install --production
 
 EXPOSE 3005
 
-CMD ["node", "/app/main.js"]
+CMD ["node", "./main.js"]
