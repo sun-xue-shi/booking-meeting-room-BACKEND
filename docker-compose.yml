@@ -14,7 +14,7 @@ services:
   mysql-container:
     image: mysql
     volumes:
-      - /init-data.sql:/var/lib/mysql 
+      - /var/lib/mysql
     environment:
       MYSQL_DATABASE: meeting_room_booking_system
       MYSQL_ROOT_PASSWORD: long
