@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common'
+import {
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable
+} from '@nestjs/common'
 import { Booking } from './entities/booking.entity'
 import {
   Between,
@@ -87,15 +93,15 @@ export class BookingService {
     const skipCount = (pageNo - 1) * pageSize
     const condition: Record<string, any> = {}
 
+    console.log('theme<><><>', theme)
+
     if (username) {
       condition.user = {
         username: Like(`%${username}%`)
       }
     }
     if (theme) {
-      condition.theme = {
-        theme: Like(`%${theme}%`)
-      }
+      condition.theme = Like(`%${theme}%`)
     }
     if (meetingRoomName) {
       condition.room = {
@@ -119,6 +125,8 @@ export class BookingService {
         new Date(bookingTimeRangeEnd)
       )
     }
+
+    console.log('condition', condition)
 
     const [bookings, totalCount] = await this.entityManager.findAndCount(
       Booking,
@@ -194,7 +202,7 @@ export class BookingService {
     const flag = await this.redisService.get('urge_' + id)
 
     if (flag) {
-      return '30min内只能催办一次哦'
+      throw new HttpException('30min内只能催办一次哦', HttpStatus.BAD_REQUEST)
     }
 
     let email = await this.redisService.get('admin_email')
@@ -254,10 +262,6 @@ export class BookingService {
     if (res) {
       throw new BadRequestException('该时间段已被预定')
     }
-
-    console.log('-------')
-
-    console.log(booking.note)
 
     await this.entityManager.save(Booking, booking)
   }

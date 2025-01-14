@@ -515,6 +515,25 @@ export class UserController {
     return 'success'
   }
 
+  // 冻结用户接口
+  @ApiQuery({
+    name: 'id',
+    description: 'userId',
+    type: Number
+  })
+  @ApiResponse({
+    description: 'success',
+    type: String
+  })
+  @ApiBearerAuth()
+  @RequireLogin()
+  @Get('unFreeze')
+  async unFreeze(@Query('id') userId: number) {
+    await this.userService.unFreezeUserById(userId)
+
+    return 'success'
+  }
+
   // 用户列表
   @ApiBearerAuth()
   @ApiQuery({

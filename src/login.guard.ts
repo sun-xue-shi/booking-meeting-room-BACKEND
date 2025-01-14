@@ -71,6 +71,9 @@ export class LoginGuard implements CanActivate {
         roles: data.roles,
         permissions: data.permissions
       }
+
+      console.log('request_user', request.user)
+
       return true
     } catch (e) {
       throw new UnauthorizedException('token失效')

@@ -11,7 +11,7 @@ import { BookingService } from './booking.service'
 
 import { generateParseIntPipe } from 'src/utils'
 import { CreateBookingDto } from './dto/create-booking.dto'
-import { UserInfo } from 'src/custom.decorator'
+import { RequireLogin, UserInfo } from 'src/custom.decorator'
 
 @Controller('booking')
 export class BookingController {
@@ -72,10 +72,13 @@ export class BookingController {
 
   // 添加预定
   @Post('add')
+  @RequireLogin()
   async add(
     @Body() booking: CreateBookingDto,
     @UserInfo('userId') userId: number
   ) {
+    console.log('userId', userId)
+
     await this.bookingService.add(booking, userId)
     return 'success'
   }

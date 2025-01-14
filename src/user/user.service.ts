@@ -344,6 +344,17 @@ export class UserService {
     await this.userRepository.save(user)
   }
 
+  // 冻结用户
+  async unFreezeUserById(userId: number) {
+    const user = await this.userRepository.findOneBy({
+      id: userId
+    })
+
+    user.is_frozen = false
+
+    await this.userRepository.save(user)
+  }
+
   // 查找用户列表
   async findUsers(
     username: string,

@@ -1,14 +1,19 @@
 import { BadRequestException, Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { MeetingRoom } from './entities/meeting-room.entity'
-import { Like, Repository } from 'typeorm'
+import { EntityManager, Like, Repository } from 'typeorm'
 import { CreateMeetingRoomDto } from './dto/create-meeting-room.dto'
 import { UpdateMeetingRoomDto } from './dto/update-meeting-room.dto'
+import { Booking } from 'src/booking/entities/booking.entity'
+import { User } from 'src/user/entities/user.entity'
 
 @Injectable()
 export class MeetingRoomService {
   @InjectRepository(MeetingRoom)
   private repository: Repository<MeetingRoom>
+
+  @InjectEntityManager()
+  entityManager: EntityManager
 
   initData() {
     const room1 = new MeetingRoom()
@@ -39,7 +44,8 @@ export class MeetingRoomService {
     name: string,
     equipment: string,
     location: string,
-    capacity: number
+    capacity: number,
+    userId: number
   ) {
     if (pageNo < 1) {
       throw new BadRequestException('页码不能小于1')
@@ -68,9 +74,14 @@ export class MeetingRoomService {
       where: condition
     })
 
+    const user = await this.entityManager.findOneBy(User, {
+      id: userId
+    })
+
     return {
       meetingRooms,
-      totalCount
+      totalCount,
+      user
     }
   }
 
@@ -122,10 +133,16 @@ export class MeetingRoomService {
 
   // 根据id删除会议室
   async delete(id: number) {
-    await this.repository.delete({
-      id
+    const bookings = await this.entityManager.findBy(Booking, {
+      room: {
+        id: id
+      }
     })
 
-    return '删除成功'
+    for (let i = 0; i < bookings.length; i++) {
+      this.entityManager.delete(Booking, bookings[i].id)
+    }
+    await this.repository.delete(id)
+    return 'success'
   }
 }

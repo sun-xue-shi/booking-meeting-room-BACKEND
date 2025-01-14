@@ -23,7 +23,7 @@ import {
   ApiResponse,
   ApiTags
 } from '@nestjs/swagger'
-import { RequireLogin } from 'src/custom.decorator'
+import { RequireLogin, UserInfo } from 'src/custom.decorator'
 import { MeetingRoomVo } from './vo/meeting-room.vo'
 import { MeetingRoomListVo } from './vo/room-list.vo'
 
@@ -78,7 +78,8 @@ export class MeetingRoomController {
     @Query('name') name: string,
     @Query('equipment') equipment: string,
     @Query('location') location: string,
-    @Query('capacity') capacity: number
+    @Query('capacity') capacity: number,
+    @UserInfo('userId') userId: number
   ) {
     return await this.meetingRoomService.find(
       pageNo,
@@ -86,7 +87,8 @@ export class MeetingRoomController {
       name,
       equipment,
       location,
-      capacity
+      capacity,
+      userId
     )
   }
 
