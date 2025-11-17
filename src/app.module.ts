@@ -26,7 +26,7 @@ import * as path from 'path'
       useFactory(configService: ConfigService) {
         return {
           type: 'mysql',
-          host: 'localhost',
+          host: configService.get('mysql_server_host'),
           port: configService.get('mysql_server_port'),
           username: configService.get('mysql_server_username'),
           password: configService.get('mysql_server_password'),

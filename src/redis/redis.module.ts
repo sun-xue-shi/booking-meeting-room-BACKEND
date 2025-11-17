@@ -14,7 +14,7 @@ import { ConfigService } from '@nestjs/config'
 
         const client = createClient({
           socket: {
-            host: 'localhost',
+            host: configService.get('redis_server_host'),
             port: configService.get('redis_server_port')
           }
         })

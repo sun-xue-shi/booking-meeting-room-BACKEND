@@ -5,8 +5,10 @@ services:
       context: ./
       dockerfile: ./Dockerfile
     depends_on:
-      - mysql-container
-      - redis-container
+      mysql-container:
+        condition: service_healthy
+      redis-container:
+        condition: service_started
     ports:
       - 3005:3005
     networks:
@@ -17,9 +19,13 @@ services:
       - /var/lib/mysql
     environment:
       MYSQL_DATABASE: meeting_room_booking_system
-      MYSQL_ROOT_PASSWORD: long
+      MYSQL_ROOT_PASSWORD: 123456
     networks:
       - common-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
   redis-container:
     image: redis
     volumes:
