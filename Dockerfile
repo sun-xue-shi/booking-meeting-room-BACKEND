@@ -1,10 +1,9 @@
-FROM node:18-alpine as build-stage
+FROM node:18.0-alpine3.14 as build-stage
 
 WORKDIR /app
 
 COPY package.json .
 
-# 使用国内镜像源加速依赖安装
 RUN npm config set registry https://registry.npmmirror.com/
 
 RUN npm install
@@ -14,14 +13,13 @@ COPY . .
 RUN npm run build
 
 # production stage
-FROM node:18-alpine as production-stage
+FROM node:18.0-alpine3.14 as production-stage
 
 COPY --from=build-stage /app/dist /app
 COPY --from=build-stage /app/package.json /app/package.json
 
 WORKDIR /app
 
-# 使用国内镜像源加速依赖安装
 RUN npm config set registry https://registry.npmmirror.com/
 
 RUN npm install --production
