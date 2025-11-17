@@ -1,5 +1,13 @@
 version: '3.8'
 services:
+  fe-app:
+    image: crpi-t28hssqio7d6i5am.cn-hangzhou.personal.cr.aliyuncs.com/long51/long:1.0.0
+    ports:
+      - 90:90
+    depends_on:
+      - nest-app
+    networks:
+      - common-network
   nest-app:
     build:
       context: ./
@@ -23,7 +31,7 @@ services:
     networks:
       - common-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
       timeout: 20s
       retries: 10
   redis-container:
