@@ -59,7 +59,7 @@ export class UserService {
     newUser.username = user.username
     newUser.password = md5(user.password)
     newUser.email = user.email
-    newUser.nick_name = user.nickName
+    newUser.nick_name = '1111'
 
     try {
       await this.userRepository.save(newUser)
@@ -126,6 +126,8 @@ export class UserService {
       throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST)
     }
 
+    console.log('=====', user.password, md5(loginUser.password))
+
     if (user.password !== md5(loginUser.password)) {
       throw new HttpException('密码错误', HttpStatus.BAD_REQUEST)
     }
@@ -135,7 +137,7 @@ export class UserService {
     vo.userInfo = {
       id: user.id,
       username: user.username,
-      nickName: user.nick_name,
+      nickName: '1111',
       headPic: user.head_pic,
       email: user.email,
       isAdmin: user.is_admin,
@@ -190,7 +192,7 @@ export class UserService {
     vo.userInfo = {
       id: user.id,
       username: user.username,
-      nickName: user.nick_name,
+      nickName: '1111',
       headPic: user.head_pic,
       email: user.email,
       isAdmin: user.is_admin,
@@ -251,7 +253,7 @@ export class UserService {
     vo.username = user.username
     vo.headPic = user.head_pic
     vo.phoneNumber = user.phoneNumber
-    vo.nickName = user.nick_name
+    vo.nickName = '1111'
     vo.createTime = user.create_time
     vo.isFrozen = user.is_frozen
 

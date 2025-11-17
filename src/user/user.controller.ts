@@ -96,7 +96,33 @@ export class UserController {
     await this.emailService.sendMail({
       to: address,
       subject: '注册验证码',
-      html: `<p>你的验证码是${code}</p>`
+      html: `
+        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+          <div style="background-color: #ffffff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="text-align: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 25px;">
+              <h1 style="color: #2c3e50; margin: 0; font-size: 24px;">微光海网络科技</h1>
+              <p style="color: #7f8c8d; margin: 5px 0 0; font-size: 16px;">账户验证服务</p>
+            </div>
+            <h2 style="color: #2c3e50; font-size: 20px; margin-top: 0;">您好！</h2>
+            <p style="color: #34495e; line-height: 1.6; font-size: 16px;">
+              感谢您注册微光海网络科技平台。为了完成您的账户注册，请在5分钟内输入以下验证码：
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="display: inline-block; padding: 15px 25px; font-size: 28px; font-weight: bold; color: #ffffff; background-color: #3498db; border-radius: 4px; letter-spacing: 3px;">${code}</span>
+            </div>
+            <p style="color: #e74c3c; font-size: 14px; font-weight: bold; text-align: center; margin: 20px 0;">
+              此验证码将在5分钟后过期，请尽快使用。
+            </p>
+            <p style="color: #7f8c8d; font-size: 14px; line-height: 1.5; border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
+              如果您没有请求此验证码，请忽略此邮件。<br>
+              此邮件由系统自动发送，请勿回复。
+            </p>
+          </div>
+          <div style="text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 12px;">
+            <p>&copy; 2025 微光海网络科技. 保留所有权利。</p>
+          </div>
+        </div>
+      `
     })
     return '发送成功'
   }
@@ -125,7 +151,33 @@ export class UserController {
     await this.emailService.sendMail({
       to: address,
       subject: '登录验证码',
-      html: `<p>你的验证码是${code}</p>`
+      html: `
+        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+          <div style="background-color: #ffffff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="text-align: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 25px;">
+              <h1 style="color: #2c3e50; margin: 0; font-size: 24px;">微光海网络科技</h1>
+              <p style="color: #7f8c8d; margin: 5px 0 0; font-size: 16px;">账户验证服务</p>
+            </div>
+            <h2 style="color: #2c3e50; font-size: 20px; margin-top: 0;">您好！</h2>
+            <p style="color: #34495e; line-height: 1.6; font-size: 16px;">
+              您正在尝试登录微光海网络科技平台。为了确保账户安全，请在5分钟内输入以下验证码：
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="display: inline-block; padding: 15px 25px; font-size: 28px; font-weight: bold; color: #ffffff; background-color: #3498db; border-radius: 4px; letter-spacing: 3px;">${code}</span>
+            </div>
+            <p style="color: #e74c3c; font-size: 14px; font-weight: bold; text-align: center; margin: 20px 0;">
+              此验证码将在5分钟后过期，请尽快使用。
+            </p>
+            <p style="color: #7f8c8d; font-size: 14px; line-height: 1.5; border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
+              如果您没有请求此验证码，请忽略此邮件。<br>
+              此邮件由系统自动发送，请勿回复。
+            </p>
+          </div>
+          <div style="text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 12px;">
+            <p>&copy; 2025 微光海网络科技. 保留所有权利。</p>
+          </div>
+        </div>
+      `
     })
     return '发送成功'
   }
@@ -440,7 +492,33 @@ export class UserController {
     await this.emailService.sendMail({
       to: address,
       subject: '更改密码',
-      html: `<p>你的验证码是${code}</p>`
+      html: `
+        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+          <div style="background-color: #ffffff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="text-align: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 25px;">
+              <h1 style="color: #2c3e50; margin: 0; font-size: 24px;">微光海网络科技</h1>
+              <p style="color: #7f8c8d; margin: 5px 0 0; font-size: 16px;">账户安全服务</p>
+            </div>
+            <h2 style="color: #2c3e50; font-size: 20px; margin-top: 0;">您好！</h2>
+            <p style="color: #34495e; line-height: 1.6; font-size: 16px;">
+              您正在申请修改微光海网络科技平台账户密码。为了确保账户安全，请在10分钟内输入以下验证码：
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="display: inline-block; padding: 15px 25px; font-size: 28px; font-weight: bold; color: #ffffff; background-color: #3498db; border-radius: 4px; letter-spacing: 3px;">${code}</span>
+            </div>
+            <p style="color: #e74c3c; font-size: 14px; font-weight: bold; text-align: center; margin: 20px 0;">
+              此验证码将在10分钟后过期，请尽快使用。
+            </p>
+            <p style="color: #7f8c8d; font-size: 14px; line-height: 1.5; border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
+              如果您没有请求此验证码，请忽略此邮件。<br>
+              此邮件由系统自动发送，请勿回复。
+            </p>
+          </div>
+          <div style="text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 12px;">
+            <p>&copy; 2025 微光海网络科技. 保留所有权利。</p>
+          </div>
+        </div>
+      `
     })
 
     return '发送成功'
@@ -490,7 +568,33 @@ export class UserController {
     await this.emailService.sendMail({
       to: address,
       subject: '修改个人信息',
-      html: `<p>你的验证码是${code}</p>`
+      html: `
+        <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+          <div style="background-color: #ffffff; padding: 30px; border-radius: 6px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <div style="text-align: center; border-bottom: 1px solid #eee; padding-bottom: 20px; margin-bottom: 25px;">
+              <h1 style="color: #2c3e50; margin: 0; font-size: 24px;">微光海网络科技</h1>
+              <p style="color: #7f8c8d; margin: 5px 0 0; font-size: 16px;">账户信息服务</p>
+            </div>
+            <h2 style="color: #2c3e50; font-size: 20px; margin-top: 0;">您好！</h2>
+            <p style="color: #34495e; line-height: 1.6; font-size: 16px;">
+              您正在申请修改微光海网络科技平台个人账户信息。为了确保账户安全，请在10分钟内输入以下验证码：
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <span style="display: inline-block; padding: 15px 25px; font-size: 28px; font-weight: bold; color: #ffffff; background-color: #3498db; border-radius: 4px; letter-spacing: 3px;">${code}</span>
+            </div>
+            <p style="color: #e74c3c; font-size: 14px; font-weight: bold; text-align: center; margin: 20px 0;">
+              此验证码将在10分钟后过期，请尽快使用。
+            </p>
+            <p style="color: #7f8c8d; font-size: 14px; line-height: 1.5; border-top: 1px solid #eee; padding-top: 20px; margin-top: 30px;">
+              如果您没有请求此验证码，请忽略此邮件。<br>
+              此邮件由系统自动发送，请勿回复。
+            </p>
+          </div>
+          <div style="text-align: center; margin-top: 20px; color: #7f8c8d; font-size: 12px;">
+            <p>&copy; 2025 微光海网络科技. 保留所有权利。</p>
+          </div>
+        </div>
+      `
     })
 
     return '发送成功'

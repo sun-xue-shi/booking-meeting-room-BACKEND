@@ -25,7 +25,7 @@ async function bootstrap() {
 
   // Swagger
   const config = new DocumentBuilder()
-    .setTitle('会议室预订系统')
+    .setTitle('微光海')
     .setDescription('api 接口文档')
     .setVersion('1.0')
     .addBearerAuth({

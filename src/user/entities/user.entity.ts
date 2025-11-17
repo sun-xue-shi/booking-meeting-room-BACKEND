@@ -18,45 +18,51 @@ export class User {
 
   @Column({
     comment: '用户名',
-    default: 'NULL',
+    default: '',
     unique: true,
-    length: 50
+    length: 50,
+    nullable: false
   })
   username: string
 
   @Column({
     comment: '密码',
-    default: 'NULL',
-    length: 50
+    default: '',
+    length: 50,
+    nullable: false
   })
   password: string
 
   @Column({
     comment: '头像',
-    default: 'NULL',
-    length: 100
+    default: '',
+    length: 100,
+    nullable: true
   })
   head_pic: string
 
   @Column({
     comment: '邮箱',
-    default: 'NULL',
-    length: 50
+    default: null,
+    length: 50,
+    nullable: true
   })
   email: string
 
   @Column({
     comment: '昵称',
-    default: 'NULL',
-    length: 50
+    default: '11',
+    length: 50,
+    nullable: true
   })
   nick_name: string
 
   @Column({
     comment: '手机号',
-    default: 'null',
+    default: null,
     // unique: true,
-    length: 20
+    length: 20,
+    nullable: true
   })
   phone: string
 

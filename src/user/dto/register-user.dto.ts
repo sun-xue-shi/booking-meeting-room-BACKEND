@@ -8,9 +8,9 @@ export class RegisterUserDto {
   @ApiProperty()
   username: string
 
-  @IsNotEmpty({
-    message: '昵称不能为空'
-  })
+  // @IsNotEmpty({
+  //   message: '昵称不能为空'
+  // })
   @ApiProperty()
   nickName: string
 
