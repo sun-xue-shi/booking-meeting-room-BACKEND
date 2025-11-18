@@ -78,6 +78,13 @@ export class User {
   })
   is_admin: boolean
 
+  @Column({
+    comment: 'IP评分',
+    default: 0,
+    type: 'int'
+  })
+  score: number
+
   @CreateDateColumn({
     comment: '创建时间'
   })

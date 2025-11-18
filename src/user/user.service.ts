@@ -33,6 +33,15 @@ export class UserService {
   @InjectRepository(Permission)
   private permissionRepository: Repository<Permission>
 
+  // 根据用户名查找用户
+  async findUserByUsername(username: string) {
+    return await this.userRepository.findOne({
+      where: {
+        username: username
+      }
+    })
+  }
+
   //注册:验证码判断-用户是否已存在-创建保存新用户-返回信息
   async register(user: RegisterUserDto) {
     const captcha = await this.redisService.get(`captcha_${user.email}`)
@@ -404,5 +413,22 @@ export class UserService {
     vo.users = users
 
     return vo
+  }
+
+  // 更新用户score
+  async updateUserScore(username: string, score: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        username: username
+      }
+    })
+
+    if (!user) {
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST)
+    }
+
+    user.score = score
+    await this.userRepository.save(user)
+    return user
   }
 }

@@ -4,6 +4,7 @@ import {
   Controller,
   DefaultValuePipe,
   Get,
+  HttpException,
   HttpStatus,
   Inject,
   Post,
@@ -37,11 +38,15 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import * as path from 'path'
 import { storage } from 'src/file-storage'
 import { EmailLoginDto } from './dto/email-login.dto'
+import { IpService } from 'src/ip/ip.service'
 
 @ApiTags('用户管理模块')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Inject(IpService)
+  private ipService: IpService
 
   @Inject(RedisService)
   private redisService: RedisService
@@ -712,5 +717,93 @@ export class UserController {
   )
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     return file.path
+  }
+
+  // 根据用户名获取诊断建议
+  @ApiQuery({
+    name: 'username',
+    description: '用户名',
+    type: String,
+    required: true
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '诊断建议',
+    schema: {
+      type: 'object',
+      properties: {
+        level: { type: 'string', example: '优秀级' },
+        conclusion: {
+          type: 'string',
+          example: '您的IP属于"优质基层劳动者IP"...'
+        },
+        suggestion: { type: 'string', example: '建议重点推进好物严选合作...' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: '用户不存在',
+    type: String
+  })
+  @Get('diagnosis')
+  async getDiagnosisByUsername(@Query('username') username: string) {
+    if (!username) {
+      throw new HttpException('用户名不能为空', HttpStatus.BAD_REQUEST)
+    }
+
+    const user = await this.userService.findUserByUsername(username)
+
+    if (!user) {
+      return null
+    }
+
+    return this.ipService.getSuggestion(user.score)
+  }
+
+  // IP诊断建议接口
+  @ApiQuery({
+    name: 'score',
+    description: 'IP评分',
+    type: Number,
+    required: true
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '诊断建议',
+    schema: {
+      type: 'object',
+      properties: {
+        level: { type: 'string', example: '优秀级' },
+        conclusion: {
+          type: 'string',
+          example: '您的IP属于"优质基层劳动者IP"...'
+        },
+        suggestion: { type: 'string', example: '建议重点推进好物严选合作...' }
+      }
+    }
+  })
+  @Get('suggest')
+  @RequireLogin()
+  async getSuggestion(
+    @Query('score') score: number,
+    @UserInfo('username') username: string
+  ) {
+    if (score === undefined || score === null || isNaN(score)) {
+      throw new HttpException(
+        'score参数不能为空且必须为数字',
+        HttpStatus.BAD_REQUEST
+      )
+    }
+
+    // 更新用户score
+    try {
+      await this.userService.updateUserScore(username, score)
+    } catch (error) {
+      throw new HttpException('用户score更新失败', HttpStatus.BAD_REQUEST)
+    }
+
+    // 返回诊断建议
+    return this.ipService.getSuggestion(score)
   }
 }
