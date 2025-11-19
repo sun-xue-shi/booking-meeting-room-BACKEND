@@ -3,6 +3,9 @@ import { Injectable } from '@nestjs/common'
 @Injectable()
 export class IpService {
   getSuggestion(score: number) {
+    if (score <= 0 || score > 64) {
+      return null
+    }
     // 优秀级（总分52-64分，各维度得分占比≥80%）
     if (score >= 52 && score <= 64) {
       return {

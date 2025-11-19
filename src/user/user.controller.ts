@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common'
 import { UserService } from './user.service'
 import { RegisterUserDto } from './dto/register-user.dto'
+import { FeedbackDto } from './dto/feedback.dto'
 import { RedisService } from 'src/redis/redis.service'
 import { EmailService } from 'src/email/email.service'
 import { PassLoginDto } from './dto/pass-login.dto'
@@ -22,7 +23,7 @@ import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
 import { RequireLogin, UserInfo } from 'src/custom.decorator'
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
-import { UpdateUserDto } from './dto/udpate-user.dto'
+import { UpdateUserDto } from './dto/update-user.dto'
 import { generateParseIntPipe } from 'src/utils'
 import {
   ApiBearerAuth,
@@ -34,6 +35,7 @@ import {
 import { LoginUserVo } from './vo/login-user.vo'
 import { RefreshTokenVo } from './vo/refresh-token.vo'
 import { UserInfoVo } from './vo/user-info.vo'
+import { UserInfoSimpleVo } from './vo/user-info-simple.vo'
 import { FileInterceptor } from '@nestjs/platform-express'
 import * as path from 'path'
 import { storage } from 'src/file-storage'
@@ -453,7 +455,7 @@ export class UserController {
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'success',
-    type: UserInfoVo
+    type: UserInfoSimpleVo
   })
   @Get('info')
   @RequireLogin()
@@ -720,12 +722,7 @@ export class UserController {
   }
 
   // 根据用户名获取诊断建议
-  @ApiQuery({
-    name: 'username',
-    description: '用户名',
-    type: String,
-    required: true
-  })
+  @ApiBearerAuth()
   @ApiResponse({
     status: HttpStatus.OK,
     description: '诊断建议',
@@ -747,7 +744,8 @@ export class UserController {
     type: String
   })
   @Get('diagnosis')
-  async getDiagnosisByUsername(@Query('username') username: string) {
+  @RequireLogin()
+  async getDiagnosisByUsername(@UserInfo('username') username: string) {
     if (!username) {
       throw new HttpException('用户名不能为空', HttpStatus.BAD_REQUEST)
     }
@@ -805,5 +803,34 @@ export class UserController {
 
     // 返回诊断建议
     return this.ipService.getSuggestion(score)
+  }
+
+  // 用户提交反馈接口
+  @ApiBearerAuth()
+  @ApiBody({
+    type: FeedbackDto
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: '反馈提交成功',
+    type: String
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: '参数验证失败',
+    type: String
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: '反馈提交失败',
+    type: String
+  })
+  @Post('feedback')
+  @RequireLogin()
+  async submitFeedback(
+    @UserInfo('userId') userId: number,
+    @Body() feedbackDto: FeedbackDto
+  ) {
+    return await this.userService.submitFeedback(userId, feedbackDto)
   }
 }

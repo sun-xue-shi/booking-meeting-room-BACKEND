@@ -4,10 +4,12 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm'
 import { Role } from './role.entity'
+import { Feedback } from './feedback.entity'
 
 @Entity({
   name: 'users'
@@ -67,6 +69,38 @@ export class User {
   phone: string
 
   @Column({
+    comment: '所在行业',
+    default: '',
+    length: 100,
+    nullable: true
+  })
+  industry: string
+
+  @Column({
+    comment: '抖音账号',
+    default: '',
+    length: 100,
+    nullable: true
+  })
+  douyin_account: string
+
+  @Column({
+    comment: '联系方式',
+    default: '',
+    length: 100,
+    nullable: true
+  })
+  contact_info: string
+
+  @Column({
+    comment: '目标需求',
+    default: '',
+    length: 200,
+    nullable: true
+  })
+  target_requirements: string
+
+  @Column({
     comment: '是否冻结',
     default: false
   })
@@ -94,6 +128,9 @@ export class User {
     comment: '更新时间'
   })
   update_time: string
+
+  @OneToMany(() => Feedback, feedback => feedback.user)
+  feedbacks: Feedback[]
 
   @ManyToMany(() => Role)
   @JoinTable({

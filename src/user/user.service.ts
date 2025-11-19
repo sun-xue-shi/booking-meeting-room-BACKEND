@@ -3,6 +3,7 @@ import { RegisterUserDto } from './dto/register-user.dto'
 import { Inject } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { User } from './entities/user.entity'
+import { Feedback } from './entities/feedback.entity'
 import { Like, Repository } from 'typeorm'
 import { Logger } from '@nestjs/common'
 import { RedisService } from 'src/redis/redis.service'
@@ -13,9 +14,11 @@ import { PassLoginDto } from './dto/pass-login.dto'
 import { LoginUserVo } from './vo/login-user.vo'
 import { UserInfoVo } from './vo/user-info.vo'
 import { UpdateUserPasswordDto } from './dto/update-user-password.dto'
-import { UpdateUserDto } from './dto/udpate-user.dto'
+import { UpdateUserDto } from './dto/update-user.dto'
 import { UserListVo } from './vo/user-list.vo'
 import { EmailLoginDto } from './dto/email-login.dto'
+import { UserInfoSimpleVo } from './vo/user-info-simple.vo'
+import { FeedbackDto } from './dto/feedback.dto'
 
 @Injectable()
 export class UserService {
@@ -23,6 +26,9 @@ export class UserService {
 
   @InjectRepository(User)
   private userRepository: Repository<User>
+
+  @InjectRepository(Feedback)
+  private feedbackRepository: Repository<Feedback>
 
   @Inject(RedisService)
   private redisService: RedisService
@@ -256,17 +262,14 @@ export class UserService {
       }
     })
 
-    const vo = new UserInfoVo()
+    const vo = new UserInfoSimpleVo()
     vo.id = user.id
     vo.email = user.email
     vo.username = user.username
-    vo.headPic = user.head_pic
-    vo.phoneNumber = user.phoneNumber
-    vo.nickName = '1111'
-    vo.createTime = user.create_time
-    vo.isFrozen = user.is_frozen
-
-    console.log(vo)
+    vo.industry = user.industry || ''
+    vo.contactInfo = user.contact_info || ''
+    vo.douyinAccount = user.douyin_account || ''
+    vo.targetRequirements = user.target_requirements ? user.target_requirements.split(',') : []
 
     return vo
   }
@@ -327,12 +330,25 @@ export class UserService {
       id: userId
     })
 
-    if (updateUser.headPic) {
-      foundUser.head_pic = updateUser.headPic
+    // 更新用户信息字段
+    if (updateUser.industry !== undefined) {
+      foundUser.industry = updateUser.industry
     }
 
-    if (updateUser.nickName) {
-      foundUser.nick_name = updateUser.nickName
+    if (updateUser.username !== undefined) {
+      foundUser.username = updateUser.username
+    }
+
+    if (updateUser.douyinAccount !== undefined) {
+      foundUser.douyin_account = updateUser.douyinAccount
+    }
+
+    if (updateUser.contactInfo !== undefined) {
+      foundUser.contact_info = updateUser.contactInfo
+    }
+
+    if (updateUser.targetRequirements !== undefined) {
+      foundUser.target_requirements = updateUser.targetRequirements.join(',')
     }
 
     try {
@@ -430,5 +446,31 @@ export class UserService {
     user.score = score
     await this.userRepository.save(user)
     return user
+  }
+
+  // 提交反馈
+  async submitFeedback(userId: number, feedbackDto: FeedbackDto) {
+    // 查找用户
+    const user = await this.userRepository.findOneBy({
+      id: userId
+    })
+
+    if (!user) {
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST)
+    }
+
+    const feedback = new Feedback()
+    feedback.issue = feedbackDto.issue
+    feedback.suggestion = feedbackDto.suggestion
+    feedback.contact = feedbackDto.contact
+    feedback.user = user
+
+    try {
+      await this.feedbackRepository.save(feedback)
+      return '反馈提交成功'
+    } catch (e) {
+      this.logger.error(e, UserService)
+      throw new HttpException('反馈提交失败', HttpStatus.INTERNAL_SERVER_ERROR)
+    }
   }
 }

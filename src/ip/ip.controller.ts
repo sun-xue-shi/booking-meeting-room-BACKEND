@@ -3,8 +3,7 @@ import {
   Get,
   Query,
   HttpException,
-  HttpStatus,
-  Inject
+  HttpStatus
 } from '@nestjs/common'
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger'
 import { IpService } from './ip.service'

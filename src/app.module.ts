@@ -5,6 +5,7 @@ import { AppService } from './app.service'
 import { User } from './user/entities/user.entity'
 import { Role } from './user/entities/role.entity'
 import { Permission } from './user/entities/permission.entity'
+import { Feedback } from './user/entities/feedback.entity'
 import { UserModule } from './user/user.module'
 import { RedisModule } from './redis/redis.module'
 import { EmailModule } from './email/email.module'
@@ -34,7 +35,7 @@ import * as path from 'path'
           database: configService.get('mysql_server_database'),
           synchronize: true,
           logging: true,
-          entities: [User, Role, Permission, MeetingRoom, Booking],
+          entities: [User, Role, Permission, MeetingRoom, Booking, Feedback],
           poolSize: 10,
           connectorPackage: 'mysql2',
           extra: {
