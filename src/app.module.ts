@@ -20,7 +20,10 @@ import { BookingModule } from './booking/booking.module'
 import { Booking } from './booking/entities/booking.entity'
 import { StatisticModule } from './statistic/statistic.module'
 import { IpModule } from './ip/ip.module'
+import { ServeModule } from './serve/serve.module'
+import { Serve } from './serve/entities/serve.entity'
 import * as path from 'path'
+import { ServerServiceOption } from './serve/entities/server-service-option.entity'
 
 @Module({
   imports: [
@@ -35,7 +38,16 @@ import * as path from 'path'
           database: configService.get('mysql_server_database'),
           synchronize: true,
           logging: true,
-          entities: [User, Role, Permission, MeetingRoom, Booking, Feedback],
+          entities: [
+            User,
+            Role,
+            Permission,
+            MeetingRoom,
+            Booking,
+            Feedback,
+            Serve,
+            ServerServiceOption
+          ],
           poolSize: 10,
           connectorPackage: 'mysql2',
           extra: {
@@ -68,7 +80,8 @@ import * as path from 'path'
     MeetingRoomModule,
     BookingModule,
     StatisticModule,
-    IpModule
+    IpModule,
+    ServeModule
   ],
   controllers: [AppController],
   providers: [

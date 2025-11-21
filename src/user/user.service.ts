@@ -262,6 +262,10 @@ export class UserService {
       }
     })
 
+    if (!user) {
+      throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST)
+    }
+
     const vo = new UserInfoSimpleVo()
     vo.id = user.id
     vo.email = user.email
@@ -269,7 +273,9 @@ export class UserService {
     vo.industry = user.industry || ''
     vo.contactInfo = user.contact_info || ''
     vo.douyinAccount = user.douyin_account || ''
-    vo.targetRequirements = user.target_requirements ? user.target_requirements.split(',') : []
+    vo.targetRequirements = user.target_requirements
+      ? user.target_requirements.split(',')
+      : []
 
     return vo
   }

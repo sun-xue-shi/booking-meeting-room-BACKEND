@@ -258,6 +258,8 @@ export class UserController {
   })
   @Post('passlogin')
   async passLogin(@Body() loginUser: PassLoginDto) {
+    console.log(11111)
+
     // 获取普通用户登录信息vo来生成token
     const vo = await this.userService.passLogin(loginUser, false)
 
